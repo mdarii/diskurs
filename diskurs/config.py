@@ -3,7 +3,7 @@ import re
 from dataclasses import asdict, is_dataclass, field
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, TypeVar, get_args, get_origin
+from typing import Any, Optional, TypeVar, Callable, get_args, get_origin, overload
 from typing import Type
 
 import yaml
@@ -12,6 +12,7 @@ from diskurs.entities import ToolDescription
 from diskurs.utils import load_module_from_path
 
 T = TypeVar("T", bound="YamlSerializable")
+AzureADTokenProvider = Callable[[], str]
 
 
 class YamlSerializable:
@@ -193,10 +194,18 @@ class AzureLLMConfig(LLMConfig):
     """
 
     type: str = "azure"
-    api_key: str
+    api_key: Optional[str] = None
+    azure_ad_token_provider: Optional[AzureADTokenProvider] = None
     api_version: str
     model_name: str
     endpoint: str
+
+    def __post_init__(self):
+        if self.azure_ad_token_provider is not None:
+            self.api_key = None
+        elif self.api_key is None:
+            raise ValueError("Either 'api_key' or 'azure_ad_token_provider' must be provided.")
+
 
 
 @dataclass

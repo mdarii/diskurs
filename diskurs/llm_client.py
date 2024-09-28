@@ -237,12 +237,14 @@ class AzureOpenAIClient(BaseOaiApiLLMClient):
     @classmethod
     def create(cls, **kwargs) -> Self:
         api_key = kwargs.get("api_key", None)
+        azure_ad_token_provider = kwargs.get("azure_ad_token_provider", None)
         model = kwargs.get("model_name", "")
         api_version = kwargs.get("api_version", "")
         azure_endpoint = kwargs.get("endpoint", "")
 
         client = AzureOpenAI(
             api_key=api_key,
+            azure_ad_token_provider=azure_ad_token_provider,
             api_version=api_version,
             azure_endpoint=azure_endpoint or os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
