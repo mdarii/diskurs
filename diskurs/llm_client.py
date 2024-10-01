@@ -9,6 +9,8 @@ from openai import APIError, APITimeoutError, RateLimitError, UnprocessableEntit
 from openai import OpenAI, BadRequestError, AzureOpenAI
 from openai.types.chat import ChatCompletion
 
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+
 from diskurs.entities import Conversation, ChatMessage, Role, ToolCall, ToolDescription, MessageType
 from diskurs.protocols import LLMClient
 from diskurs.registry import register_llm
@@ -237,13 +239,22 @@ class AzureOpenAIClient(BaseOaiApiLLMClient):
     @classmethod
     def create(cls, **kwargs) -> Self:
         api_key = kwargs.get("api_key", None)
+        auth_method = kwargs.get("auth_method", "")
         model = kwargs.get("model_name", "")
         api_version = kwargs.get("api_version", "")
         azure_endpoint = kwargs.get("endpoint", "")
+        token_provider = None
+
+        if auth_method is "entra-id":
+            token_provider = get_bearer_token_provider(
+                DefaultAzureCredential(),"https://cognitiveservices.azure.com/.default"
+            )
+            api_key = None
 
         client = AzureOpenAI(
             api_key=api_key,
             api_version=api_version,
             azure_endpoint=azure_endpoint or os.getenv("AZURE_OPENAI_ENDPOINT"),
+            token_provider=token_provider,
         )
         return cls(client=client, model=model, max_repeat=3)

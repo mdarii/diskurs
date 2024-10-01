@@ -193,7 +193,8 @@ class AzureLLMConfig(LLMConfig):
     """
 
     type: str = "azure"
-    api_key: str
+    api_key: Optional[str] = None
+    auth_method: Optional[str] = "key"
     api_version: str
     model_name: str
     endpoint: str
