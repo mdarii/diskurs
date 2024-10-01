@@ -245,7 +245,7 @@ class AzureOpenAIClient(BaseOaiApiLLMClient):
         azure_endpoint = kwargs.get("endpoint", "")
         token_provider = None
 
-        if auth_method is "entra-id":
+        if auth_method=="entra-id":
             token_provider = get_bearer_token_provider(
                 DefaultAzureCredential(),"https://cognitiveservices.azure.com/.default"
             )
@@ -255,6 +255,6 @@ class AzureOpenAIClient(BaseOaiApiLLMClient):
             api_key=api_key,
             api_version=api_version,
             azure_endpoint=azure_endpoint or os.getenv("AZURE_OPENAI_ENDPOINT"),
-            token_provider=token_provider,
+            azure_ad_token_provider=token_provider,
         )
         return cls(client=client, model=model, max_repeat=3)
